@@ -2,15 +2,17 @@
  * @jest-environment jsdom
  */
 
+
+import '@testing-library/jest-dom/extend-expect';
 import {fireEvent, screen, waitFor} from "@testing-library/dom"
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
 import {localStorageMock} from "../__mocks__/localStorage.js";
 import mockStore from "../__mocks__/store"
 import {ROUTES, ROUTES_PATH} from "../constants/routes.js";
-import {toHaveClass} from "@testing-library/jest-dom"
 import userEvent from "@testing-library/user-event";
 import router from "../app/Router.js";
+
 
 
 jest.mock("../app/store", () => mockStore)
@@ -21,7 +23,7 @@ const onNavigate = (pathname) => {
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
-    test("Then the extension of an uploaded file is jpeg, jpg or png", () => {
+    test("Then the extension of an uploaded file is not jpeg, jpg or png", () => {
       // On lance le stockage interne
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
       // On ajoute un user Employee au local storage pour simuler la connexion
@@ -32,27 +34,50 @@ describe("Given I am connected as an employee", () => {
       const html = NewBillUI()
       document.body.innerHTML = html
       // On démarre le container newBill pour accèder à notre fonction
-      const newBillContainer = new NewBill({document, onNavigate, Store: null, localStorage: window.localStorage})
+      const newBillContainer = new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})
       // On crée une simulation de la fonction handleChangeFile
       const handleChangeFile = jest.fn(newBillContainer.handleChangeFile)
       // On récupère le champ fichier
       const inputFile = screen.getByTestId('file')
-      // Quand un fichier est ajouté on appelle notre fonction simulée (handleChangeFile)
-      inputFile.addEventListener('change', handleChangeFile)
-      // On simule qu'un utilisateur ajoute un fichier
-      fireEvent.change(inputFile, {
-        target: {
-          files: [
-            new File(['document.pdf'], 'document.pdf', {
-              type: 'application/pdf',
-            }),
-          ],
-        },
+      // On crée notre fichier à upload
+      const testFile = new File(['document.pdf'], 'document.pdf', {
+        type: 'application/pdf',
       })
+      // On ajoute notre fonction handleChangeFile à notre fichier
+      inputFile.addEventListener('change', handleChangeFile)
+      // On simule l'upload du fichier
+      userEvent.upload(inputFile, testFile)
       expect(handleChangeFile).toHaveBeenCalled();
+      expect(inputFile.files[0].type).toBe('application/pdf')
       // On récupère le message d'erreur
       const errorFile = screen.getByTestId('error-file')
-      expect(errorFile.textContent).toEqual('Fichier incorrect. JPEG, JPG ou PNG uniquement.');
+      expect(errorFile).toHaveStyle('display: block');
+      // On récupère le bouton submit
+      const submitButton = screen.getByRole('button')
+      expect(submitButton).toBeDisabled();
+    })
+
+    test("Then the extension of an uploaded file is jpeg, jpg or png", () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+      const html = NewBillUI()
+      document.body.innerHTML = html
+      const newBillContainer = new NewBill({document, onNavigate, store: mockStore, localStorage: window.localStorage})
+      const handleChangeFile = jest.fn(newBillContainer.handleChangeFile)
+      const inputFile = screen.getByTestId('file')
+      const testFile = new File(['image.jpg'], 'image.jpg', {
+        type: 'image/jpg',
+      })
+      inputFile.addEventListener('change', handleChangeFile)
+      userEvent.upload(inputFile, testFile)
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(inputFile.files[0].type).toBe('image/jpg')
+      const errorFile = screen.getByTestId('error-file')
+      expect(errorFile).toHaveStyle('display: none');
+      const submitButton = screen.getByRole('button')
+      expect(submitButton).not.toBeDisabled();
     })
 
     test("Then mail bill icon in vertical layout should be highlighted", async () => {

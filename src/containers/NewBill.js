@@ -26,8 +26,8 @@ export default class NewBill {
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
-
-    if (fileExt[1] != "png" && fileExt[1] != "jpeg" && fileExt[1] != "jpg") {
+console.log(file.type)
+    if (file.type != 'image/jpg' && file.type != 'image/jpeg' && file.type != 'image/png') {
       document.querySelector('.error-file').style.display = 'block'
       document.getElementById('btn-send-bill').disabled = true
       return false
