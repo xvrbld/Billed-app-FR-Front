@@ -36,13 +36,11 @@ describe("Given I am connected as an employee", () => {
       const windowIcon = screen.getByTestId('icon-window')
       //to-do write expect expression
       expect(windowIcon).toHaveClass('active-icon')
-
     })
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
-      //const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
-      const dates = screen.getAllByText(/[0-9]+\s[a-zA-Z]+\.\s[0-9]+/i).map(a => a.innerHTML)
-      const antiChrono = (a, b) => ((a < b) ? 1 : +1)
+      const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
+      const antiChrono = (a, b) => ((a < b) ? 1 : -1)
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
     })
@@ -68,7 +66,6 @@ describe("Given I am connected as an employee", () => {
       userEvent.click(eyeIcon)
       //to-do write expect expression
       expect(handleClickEyeIcon).toHaveBeenCalled()
-      
     })
     
     //test erreur api mock 404/500

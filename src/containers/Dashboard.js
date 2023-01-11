@@ -146,8 +146,9 @@ export default class {
     }
 
     bills.forEach(bill => {
-      //$(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
-      $(`#open-bill${bill.id}`).off().on("click",((e) => this.handleEditTicket(e, bill, bills)));
+      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
+      // Quand HandleShowTickets est rappelé on enlève les évènements sur chaque bills et on le recréé pour éviter les doublons d'évènements
+      //$(`#open-bill${bill.id}`).off().on("click",((e) => this.handleEditTicket(e, bill, bills)));
     })
 
     return bills

@@ -10,6 +10,7 @@ const row = (bill) => {
       <td>${bill.type}</td>
       <td>${bill.name}</td>
       <td>${formatDate(bill.date)}</td>
+      <td style="display: none">${bill.date}</td>
       <td>${bill.amount} €</td>
       <td>${bill.status}</td>
       <td>
@@ -25,6 +26,10 @@ const row = (bill) => {
     .map(bill => row(bill))
     .join("") : ""
   }
+
+  /*const rows = (data) => {
+  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+}*/
 
 export default ({ data: bills, loading, error }) => {
   
